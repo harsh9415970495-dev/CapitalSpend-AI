@@ -31,12 +31,12 @@ function AppContent() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
       <Sidebar />
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col min-w-0 md:ml-72"> {/* Fixed: ml-72 pushes content past the sidebar */}
         <Navbar />
-        <main className="p-6">
-          <div className="container mx-auto">
+        <main className="flex-1 overflow-x-hidden p-4 md:p-8">
+          <div className="max-w-[1600px] mx-auto">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/expenses" element={<ExpenseList />} />
@@ -48,6 +48,7 @@ function AppContent() {
       </div>
     </div>
   );
+
 }
 
 function App() {

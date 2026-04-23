@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --bg-main: #f8fafc;
+    --bg-card: rgba(255, 255, 255, 0.8);
+    --bg-sidebar: #ffffff;
+    --text-main: #0f172a;
+    --text-dim: #64748b;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #6366f1;
+    --border-glass: rgba(0, 0, 0, 0.05);
+    --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .dark {
+    --bg-main: #020617;
+    --bg-card: rgba(15, 23, 42, 0.7);
+    --bg-sidebar: #020617;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -9,74 +35,96 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Smooth animations */
+/* Global Cursor & Selection Fixes */
+h1, h2, h3, h4, h5, h6, label, p, span, div:not([contenteditable="true"]) {
+  cursor: default;
+  user-select: none;
+}
+
+input, textarea, [contenteditable="true"] {
+  cursor: text;
+  user-select: text;
+}
+
+button, a, select, input[type="checkbox"], input[type="radio"], .cursor-pointer {
+  cursor: pointer !important;
+}
+
+button *, a * {
+  cursor: pointer !important;
+}
+
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-800 rounded-full hover:bg-slate-400 dark:hover:bg-slate-700 transition-colors;
+}
+
 @layer components {
-  .btn-primary {
-    @apply px-4 py-2 bg-primary text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium;
+  .glass-card {
+    @apply bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-2xl;
+    box-shadow: var(--card-shadow);
   }
 
-  .btn-secondary {
-    @apply px-4 py-2 bg-secondary text-white rounded-lg hover:bg-pink-600 transition-all duration-200 font-medium;
+  .btn-premium {
+    @apply relative px-6 py-2.5 rounded-xl font-semibold overflow-hidden transition-all duration-300 text-white shadow-lg;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   }
 
-  .btn-outline {
-    @apply px-4 py-2 border-2 border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-all duration-200 font-medium;
+  .btn-premium:hover {
+    @apply transform -translate-y-0.5 scale-[1.02];
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
   }
 
-  .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6;
+  .input-premium {
+    @apply bg-slate-100/50 dark:bg-slate-800/50 border border-black/5 dark:border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 text-slate-900 dark:text-white transition-all duration-200;
   }
 
-  .input-field {
-    @apply w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white transition-all duration-200;
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-indigo-400;
   }
 
-  .toast {
-    @apply fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white font-medium animate-pulse;
+  .stat-card {
+    @apply glass-card p-6 transition-all duration-300 cursor-default;
   }
 
-  .toast-success {
-    @apply bg-success;
-  }
-
-  .toast-error {
-    @apply bg-danger;
-  }
-
-  .toast-warning {
-    @apply bg-warning;
+  .stat-card:hover {
+    @apply -translate-y-1 ring-1 ring-blue-500/20 dark:ring-blue-500/30;
+    background: var(--bg-card);
   }
 }
 
-/* Animations */
-@keyframes slideIn {
-  from {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+/* Page Transitions */
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-slideIn {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.3s ease-out forwards;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { expenseAPI } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import { Save, X } from 'lucide-react';
 
 const ExpenseForm = ({ onAdd, onCancel, editData, onUpdate }) => {
   const { user } = useContext(AuthContext);
@@ -27,77 +28,117 @@ const ExpenseForm = ({ onAdd, onCancel, editData, onUpdate }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editData) {
-      const res = await expenseAPI.updateExpense(editData._id, formData);
-      if (onUpdate) onUpdate(res.data.expense);
-    } else {
-      const res = await expenseAPI.addExpense(formData);
-      onAdd(res.data.expense);
+    setLoading(true);
+    try {
+      if (editData) {
+        const res = await expenseAPI.updateExpense(editData._id, formData);
+        if (onUpdate) onUpdate(res.data.expense);
+      } else {
+        const res = await expenseAPI.addExpense(formData);
+        onAdd(res.data.expense);
+      }
+    } catch (err) {
+      console.error("Submission failed:", err);
+      alert(err.response?.data?.message || "Failed to save expense. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
+
   return (
-    <div className="bg-[#1e293b] p-6 rounded-2xl shadow-lg text-white">
-
-      <h2 className="text-xl font-semibold mb-4">{editData ? 'Edit Expense' : 'Add Expense'}</h2>
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-
-        <input
-          type="number"
-          name="amount"
-          placeholder="Amount ₹"
-          value={formData.amount}
-          onChange={handleChange}
-          required
-          className="col-span-2 p-3 rounded-lg bg-[#334155] outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <select
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          className="p-3 rounded-lg bg-[#334155] outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option>Food</option>
-          <option>Travel</option>
-          <option>Shopping</option>
-          <option>Bills</option>
-          <option>Entertainment</option>
-          <option>Other</option>
-        </select>
-
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-          className="p-3 rounded-lg bg-[#334155] outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <textarea
-          name="note"
-          placeholder="Note (optional)"
-          value={formData.note}
-          onChange={handleChange}
-          className="col-span-2 p-3 rounded-lg bg-[#334155] outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <button type="submit" className="bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-medium transition">
-          {editData ? 'Update' : 'Add'}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          {editData ? 'Edit Transaction' : 'Record New Expense'}
+        </h2>
+        <button onClick={onCancel} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-full transition-all">
+          <X size={20} />
         </button>
+      </div>
 
-        <button
-          type="button"
-          onClick={onCancel}
-          className="bg-gray-600 hover:bg-gray-700 p-3 rounded-lg font-medium transition"
-        >
-          Cancel
-        </button>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="md:col-span-2">
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Amount (₹)</label>
+          <input
+            type="number"
+            name="amount"
+            placeholder="0.00"
+            value={formData.amount}
+            onChange={handleChange}
+            required
+            className="input-premium w-full text-lg font-bold"
+          />
+        </div>
 
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Category</label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="input-premium w-full appearance-none"
+          >
+            <option>Food</option>
+            <option>Travel</option>
+            <option>Shopping</option>
+            <option>Bills</option>
+            <option>Entertainment</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Transaction Date</label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            required
+            className="input-premium w-full"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Note / Memo</label>
+          <textarea
+            name="note"
+            placeholder="What was this for?"
+            value={formData.note}
+            onChange={handleChange}
+            className="input-premium w-full h-24 resize-none"
+          />
+        </div>
+
+        <div className="md:col-span-2 flex gap-3 mt-2">
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="btn-premium flex-1 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            ) : (
+              <Save size={18} />
+            )}
+            <span>
+              {loading ? 'Recording...' : (editData ? 'Save Changes' : 'Record Transaction')}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-6 py-2.5 rounded-xl font-bold bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 transition-all border border-slate-200 dark:border-white/5"
+          >
+            Discard
+          </button>
+        </div>
       </form>
     </div>
   );

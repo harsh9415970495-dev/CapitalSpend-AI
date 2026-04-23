@@ -8,6 +8,8 @@ const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/auth');
 const expenseRoutes = require('./routes/expenses');
 const budgetRoutes = require('./routes/budget');
+const chatRoutes = require('./routes/chat');
+
 
 const app = express();
 
@@ -22,6 +24,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/budget', budgetRoutes);
+app.use('/api/chat', chatRoutes);
+
 
 // Health check
 app.get('/api/health', (req, res) => {

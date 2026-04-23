@@ -9,9 +9,10 @@ const validatePassword = (password) => {
 
 const validateExpense = (amount, category) => {
   if (!amount || amount <= 0) return false;
-  if (!['Food', 'Travel', 'Shopping', 'Bills', 'Entertainment', 'Others'].includes(category)) {
+  if (!['Food', 'Travel', 'Shopping', 'Bills', 'Entertainment', 'Other', 'Others'].includes(category)) {
     return false;
   }
+
   return true;
 };
 

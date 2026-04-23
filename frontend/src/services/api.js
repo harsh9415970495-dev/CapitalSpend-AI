@@ -28,8 +28,9 @@ export const expenseAPI = {
   updateExpense: (id, data) => api.put(`/expenses/${id}`, data),
   deleteExpense: (id) => api.delete(`/expenses/${id}`),
   getSummary: () => api.get('/expenses/summary'),
-  exportExpenses: (params) => api.get('/expenses/export', { params, responseType: 'blob' }),
+  exportPDF: (params) => api.get('/expenses/export-pdf', { params, responseType: 'blob' }),
 };
+
 
 export const budgetAPI = {
   setBudget: (data) => api.post('/budget/set', data),

@@ -255,43 +255,125 @@ exports.getExpenseSummary = async (req, res) => {
   }
 };
 
-// Export expenses as CSV
-exports.exportExpenses = async (req, res) => {
+const Budget = require('../models/Budget');
+const PDFDocument = require('pdfkit');
+
+
+// Export expenses as PDF
+exports.exportPDF = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-
-    const filter = { userId: req.user._id }; // Fixed: using req.user._id
+    const filter = { userId: req.user._id };
 
     if (startDate || endDate) {
       filter.date = {};
-      if (startDate) {
-        const start = new Date(startDate);
-        if (isNaN(start.getTime())) {
-          return res.status(400).json({ message: '❌ Invalid start date format' });
-        }
-        filter.date.$gte = start;
-      }
-      if (endDate) {
-        const end = new Date(endDate);
-        if (isNaN(end.getTime())) {
-          return res.status(400).json({ message: '❌ Invalid end date format' });
-        }
-        filter.date.$lte = end;
-      }
+      if (startDate) filter.date.$gte = new Date(startDate);
+      if (endDate) filter.date.$lte = new Date(endDate);
     }
 
-    const expenses = await Expense.find(filter).sort({ date: -1 });
+    const [expenses, budgetDoc, fullUser] = await Promise.all([
+      Expense.find(filter).sort({ date: -1 }),
+      Budget.findOne({ userId: req.user._id }).sort({ month: -1 }),
+      User.findById(req.user._id)
+    ]);
 
-    let csv = 'Date,Category,Amount,Note\n';
-    expenses.forEach((exp) => {
-      const dateStr = exp.date.toISOString().split('T');
-      csv += `${dateStr},${exp.category},${exp.amount},"${exp.note}"\n`;
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    let filename = `SmartSpend_${fullUser?.username || 'Report'}.pdf`;
+    
+    res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
+    res.setHeader('Content-type', 'application/pdf');
+
+    // --- Branded Header ---
+    doc.rect(0, 0, 600, 120).fill('#0f172a'); // Dark Obsidian Header
+    doc.fillColor('#3b82f6').fontSize(28).font('Helvetica-Bold').text('SmartSpend AI', 50, 40);
+    doc.fillColor('#94a3b8').fontSize(10).font('Helvetica').text('FINANCIAL INTELLIGENCE REPORT', 50, 75, { characterSpacing: 2 });
+    
+    // User Info (Right Aligned)
+    doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold').text(fullUser?.username?.toUpperCase() || 'VALUED MEMBER', 400, 45, { align: 'right' });
+    doc.fillColor('#94a3b8').font('Helvetica').fontSize(8).text(fullUser?.email || '', 400, 58, { align: 'right' });
+    doc.fillColor('#ffffff').fontSize(8).text(`Report Date: ${new Date().toLocaleDateString()}`, 400, 75, { align: 'right' });
+    
+    doc.moveDown(4);
+
+
+    // --- Summary Section (3 Rounded Cards) ---
+    const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const budgetAmount = budgetDoc?.amount || 0;
+    const remaining = budgetAmount - totalSpent;
+
+    // Card 1: Monthly Budget
+    doc.roundedRect(50, 140, 155, 80, 15).fill('#f8fafc').stroke('#e2e8f0');
+    doc.fillColor('#64748b').fontSize(7).font('Helvetica-Bold').text('MONTHLY BUDGET', 65, 160);
+    doc.fillColor('#3b82f6').fontSize(16).text(`INR ${budgetAmount.toLocaleString()}`, 65, 175);
+
+    // Card 2: Total Spent
+    doc.roundedRect(220, 140, 155, 80, 15).fill('#f8fafc').stroke('#e2e8f0');
+    doc.fillColor('#64748b').fontSize(7).font('Helvetica-Bold').text('TOTAL SPENT', 235, 160);
+    doc.fillColor('#ef4444').fontSize(16).text(`INR ${totalSpent.toLocaleString()}`, 235, 175);
+
+    // Card 3: Remaining
+    doc.roundedRect(390, 140, 155, 80, 15).fill('#f8fafc').stroke('#e2e8f0');
+    doc.fillColor('#64748b').fontSize(7).font('Helvetica-Bold').text('REMAINING BALANCE', 405, 160);
+    doc.fillColor(remaining >= 0 ? '#10b981' : '#ef4444').fontSize(16).text(`INR ${remaining.toLocaleString()}`, 405, 175);
+
+    doc.moveDown(7);
+
+
+    // --- Transactions Table ---
+    doc.fillColor('#0f172a').fontSize(14).font('Helvetica-Bold').text('Transaction History', 50, 250);
+    doc.moveDown(1);
+
+    // Table Header Bar
+    const tableTop = 280;
+    doc.rect(50, tableTop, 495, 25).fill('#1e293b');
+    doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold');
+    doc.text('DATE', 70, tableTop + 8);
+    doc.text('CATEGORY', 160, tableTop + 8);
+    doc.text('MEMO / NOTE', 260, tableTop + 8);
+    doc.text('AMOUNT', 450, tableTop + 8, { align: 'right', width: 80 });
+
+    let currentY = tableTop + 25;
+    
+    // Rows
+    doc.font('Helvetica').fontSize(9);
+    expenses.forEach((exp, i) => {
+      // zebra striping
+      if (i % 2 === 0) {
+        doc.rect(50, currentY, 495, 25).fill('#f1f5f9');
+      }
+
+      doc.fillColor('#64748b').text(new Date(exp.date).toLocaleDateString(), 70, currentY + 8);
+      doc.fillColor('#0f172a').font('Helvetica-Bold').text(exp.category, 160, currentY + 8);
+      doc.fillColor('#64748b').font('Helvetica').text(exp.note || '---', 260, currentY + 8, { width: 180, ellipsis: true });
+      doc.fillColor('#0f172a').font('Helvetica-Bold').text(`INR ${exp.amount.toLocaleString()}`, 450, currentY + 8, { align: 'right', width: 80 });
+
+      currentY += 25;
+
+      // Page break check
+      if (currentY > 750) {
+        doc.addPage();
+        currentY = 50;
+      }
     });
 
-    res.header('Content-Type', 'text/csv');
-    res.header('Content-Disposition', 'attachment; filename="expenses.csv"');
-    res.send(csv);
+    // --- Footer ---
+    const pageCount = doc.bufferedPageRange().count;
+    for (let i = 0; i < pageCount; i++) {
+      doc.switchToPage(i);
+      doc.fillColor('#94a3b8').fontSize(8).text(
+        `SmartSpend AI - Page ${i + 1} of ${pageCount} | Generated on ${new Date().toLocaleString()}`,
+        0,
+        800,
+        { align: 'center', width: 595 }
+      );
+    }
+
+    doc.pipe(res);
+    doc.end();
+
+
   } catch (error) {
-    res.status(500).json({ message: '❌ Server error', error: error.message });
+    console.error('PDF Export Error:', error);
+    res.status(500).json({ message: '❌ PDF Generation Failed', error: error.message });
   }
-};
+};

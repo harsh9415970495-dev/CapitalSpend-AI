@@ -14,11 +14,22 @@ exports.setBudget = async (req, res) => {
       return res.status(400).json({ error: 'Invalid budget amount' });
     }
 
+    // Normalize month to the first day of the current month
+    const startOfMonth = new Date();
+    startOfMonth.setHours(0, 0, 0, 0);
+    startOfMonth.setDate(1);
+
     // Create or update budget entry
+    // Explicitly cast userId to ObjectId to ensure matching works correctly
     const budget = await Budget.findOneAndUpdate(
-      { userId: req.user._id },
-      { amount: budgetAmount, month: new Date() },
-      { new: true, upsert: true }
+      { userId: new mongoose.Types.ObjectId(req.user._id) },
+      { 
+        $set: { 
+          amount: budgetAmount, 
+          month: startOfMonth 
+        } 
+      },
+      { new: true, upsert: true, runValidators: true }
     );
     
     // Update the user's monthly budget as well so it reflects in the profile
@@ -29,6 +40,7 @@ exports.setBudget = async (req, res) => {
       message: 'Budget updated successfully!',
       budget
     });
+
   } catch (error) {
     console.error('Budget save error:', error);
     res.status(500).json({ error: 'Failed to update budget', details: error.message });
@@ -76,10 +88,11 @@ exports.getBudgetStatus = async (req, res) => {
     const monthlyExpenses = await Expense.aggregate([
       {
         $match: {
-          userId: req.user._id,
+          userId: new mongoose.Types.ObjectId(req.user._id),
           date: { $gte: currentMonth, $lt: nextMonth },
         },
       },
+
       {
         $group: {
           _id: null,

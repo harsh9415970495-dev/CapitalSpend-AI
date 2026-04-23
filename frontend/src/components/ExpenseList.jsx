@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { expenseAPI } from '../services/api';
 import ExpenseForm from './ExpenseForm';
-import { Edit2, Trash2, Download } from 'lucide-react';
+import { Edit2, Trash2, Download, Plus, Calendar, Receipt } from 'lucide-react';
 
 const ExpenseList = () => {
   const [expenses, setExpenses] = useState([]);
@@ -44,13 +44,12 @@ const ExpenseList = () => {
       setExpenses(expenses.filter((e) => e._id !== id));
     } catch (err) {
       console.error(err);
-      alert("Delete failed");
     }
   };
 
   const handleEditClick = (expense) => {
     setEditingExpense(expense);
-    setShowForm(false); // Hide add form if open
+    setShowForm(false);
   };
 
   const handleCancelForm = () => {
@@ -58,114 +57,145 @@ const ExpenseList = () => {
     setEditingExpense(null);
   };
 
-  const handleExportCSV = async () => {
+  const handleExportPDF = async () => {
     try {
-      const res = await expenseAPI.exportExpenses();
-      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const res = await expenseAPI.exportPDF({ date: selectedDate });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'expenses.csv');
+      link.setAttribute('download', `SmartSpend_Report_${new Date().toLocaleDateString()}.pdf`);
       document.body.appendChild(link);
       link.click();
+      link.remove();
     } catch (err) {
-      console.error("Export failed:", err);
-      alert("Failed to export CSV");
+      console.error("PDF Export failed:", err);
+      alert("Failed to generate PDF report.");
     }
   };
 
-  return (
-    <div className="bg-[#0f172a] min-h-screen p-6 text-white space-y-6">
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-3xl font-bold">Expenses</h1>
-        <div className="flex items-center gap-4">
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-[#1e293b] p-2.5 rounded-xl border border-gray-700 outline-none focus:border-blue-500 transition"
-          />
+  return (
+    <div className="p-4 md:p-8 animate-fadeIn space-y-8">
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Transaction <span className="text-gradient">History</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Review and manage your detailed spending logs.</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <div className="relative flex-1 lg:flex-none">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="input-premium pl-10 w-full"
+            />
+          </div>
+          
           <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-2.5 rounded-xl font-medium transition"
+            onClick={handleExportPDF}
+            className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 px-4 py-2.5 rounded-xl font-semibold transition-all text-slate-600 dark:text-slate-300"
           >
             <Download size={18} />
-            Export CSV
+            <span className="hidden sm:inline">Export PDF</span>
           </button>
+
+
           <button
             onClick={() => { setShowForm(true); setEditingExpense(null); }}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl font-medium shadow-lg transition"
+            className="btn-premium flex items-center gap-2 px-6 py-2.5 text-white"
           >
-            + Add Expense
+            <Plus size={18} />
+            <span>New Expense</span>
           </button>
         </div>
       </div>
 
       {(showForm || editingExpense) && (
-        <ExpenseForm
-          onAdd={handleAdd}
-          onUpdate={handleUpdate}
-          onCancel={handleCancelForm}
-          editData={editingExpense}
-        />
+        <div className="glass-card p-6 animate-slideIn">
+           <ExpenseForm
+            onAdd={handleAdd}
+            onUpdate={handleUpdate}
+            onCancel={handleCancelForm}
+            editData={editingExpense}
+          />
+        </div>
       )}
 
       {/* TABLE */}
-      <div className="bg-[#1e293b] rounded-2xl overflow-hidden shadow-lg border border-gray-800">
+      <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-[#334155] border-b border-gray-700">
-              <tr>
-                <th className="p-4 font-semibold text-gray-300">Date</th>
-                <th className="p-4 font-semibold text-gray-300">Category</th>
-                <th className="p-4 font-semibold text-gray-300">Note</th>
-                <th className="p-4 font-semibold text-gray-300">Amount</th>
-                <th className="p-4 font-semibold text-gray-300 text-center">Actions</th>
+            <thead>
+              <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-100 dark:border-white/5">
+                <th className="p-5 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest">Date</th>
+                <th className="p-5 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest">Category</th>
+                <th className="p-5 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest">Memo</th>
+                <th className="p-5 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest">Amount</th>
+                <th className="p-5 font-bold text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest text-center">Actions</th>
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {expenses.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center text-gray-400">
-                    No expenses found.
+                  <td colSpan="5" className="p-12 text-center text-slate-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <Receipt size={40} className="opacity-20 mb-2" />
+                      <p>No transaction records found.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 expenses.map((e) => (
-                  <tr key={e._id} className="border-b border-gray-800 hover:bg-[#334155]/50 transition">
-                    <td className="p-4 whitespace-nowrap">
-                      {new Date(e.date).toLocaleDateString(undefined, {
-                        year: 'numeric', month: 'short', day: 'numeric'
-                      })}
+                  <tr key={e._id} className="group hover:bg-slate-50/50 dark:hover:bg-white/[0.01] transition-colors">
+                    <td className="p-5 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className="text-slate-900 dark:text-white font-semibold">
+                           {new Date(e.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-bold uppercase">
+                          {new Date(e.date).getFullYear()}
+                        </span>
+                      </div>
                     </td>
-                    <td className="p-4">
-                      <span className="bg-gray-700 px-2.5 py-1 rounded-md text-sm">
+                    <td className="p-5">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                         {e.category}
                       </span>
                     </td>
-                    <td className="p-4 text-gray-400 max-w-xs truncate" title={e.note}>
-                      {e.note || '-'}
+                    <td className="p-5">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate font-medium" title={e.note}>
+                        {e.note || <span className="italic opacity-30 text-xs text-slate-400">No memo</span>}
+                      </p>
                     </td>
-                    <td className="p-4 font-bold text-gray-100">
-                      ₹{e.amount.toLocaleString()}
+                    <td className="p-5">
+                      <span className="text-lg font-black text-slate-900 dark:text-white">
+                        ₹{e.amount.toLocaleString()}
+                      </span>
                     </td>
 
-                    <td className="p-4 flex justify-center gap-3">
-                      <button
-                        onClick={() => handleEditClick(e)}
-                        className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition"
-                        title="Edit"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(e._id)}
-                        className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition"
-                        title="Delete"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    <td className="p-5">
+                      <div className="flex justify-center gap-2 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleEditClick(e)}
+                          className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all"
+                          title="Edit"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(e._id)}
+                          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -174,7 +204,6 @@ const ExpenseList = () => {
           </table>
         </div>
       </div>
-
     </div>
   );
 };
