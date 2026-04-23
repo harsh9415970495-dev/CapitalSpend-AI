@@ -17,7 +17,11 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://capitalspend.netlify.app', 'http://localhost:5173'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Routes
