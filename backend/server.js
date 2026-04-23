@@ -18,9 +18,13 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: ['https://capitalspend.netlify.app', 'http://localhost:5173'],
-  credentials: true
+  origin: '*', // Allow all for now to unblock deployment, or use the list below
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
+
 
 app.use(express.json());
 
