@@ -6,6 +6,7 @@ const Expense = require('../models/Expense');
 const Budget = require('../models/Budget');
 const Chat = require('../models/Chat');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // Get chat history
 router.get('/', auth, async (req, res) => {
@@ -32,23 +33,44 @@ router.post('/', auth, async (req, res) => {
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
 
-    const [budgetDoc, expenses, categoryBreakdown, user] = await Promise.all([
+    const userIdObj = new mongoose.Types.ObjectId(userId);
+
+    const [budgetDoc, currentMonthExpenses, categoryBreakdown, user, allTimeTotal, allTimeCategoryBreakdown, recentExpenses] = await Promise.all([
       Budget.findOne({ userId, month: { $gte: startOfMonth, $lt: endOfMonth } }),
       Expense.find({ userId, date: { $gte: startOfMonth, $lt: endOfMonth } }),
       Expense.aggregate([
-        { $match: { userId, date: { $gte: startOfMonth, $lt: endOfMonth } } },
+        { $match: { userId: userIdObj, date: { $gte: startOfMonth, $lt: endOfMonth } } },
         { $group: { _id: '$category', amount: { $sum: '$amount' } } }
       ]),
-      User.findById(userId)
+      User.findById(userId),
+      Expense.aggregate([
+        { $match: { userId: userIdObj } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      Expense.aggregate([
+        { $match: { userId: userIdObj } },
+        { $group: { _id: '$category', amount: { $sum: '$amount' } } },
+        { $sort: { amount: -1 } }
+      ]),
+      Expense.find({ userId }).sort({ date: -1 }).limit(10)
     ]);
 
     const budget = budgetDoc?.amount || 0;
-    const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalSpentThisMonth = currentMonthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalSpentAllTime = allTimeTotal[0]?.total || 0;
 
     const userData = {
       budget,
-      totalSpent,
+      totalSpentThisMonth,
+      totalSpentAllTime,
       categoryBreakdown,
+      allTimeCategoryBreakdown,
+      recentExpenses: recentExpenses.map(e => ({
+          amount: e.amount,
+          category: e.category,
+          date: e.date.toISOString().split('T')[0],
+          note: e.note
+      })),
       userName: user?.username
     };
 
