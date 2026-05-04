@@ -1,0 +1,43 @@
+backend
+├── .env
+├── .gitignore
+├── backend-arc-graph.dot
+├── backend-arc-graph.txt
+├── backend-arc-meta.json
+├── backend-arc-structure.txt
+├── Capital_Spend_AI_Technical_Report.pdf
+├── config
+│   └── db.js
+├── controllers
+│   ├── authController.js
+│   ├── budgetController.js
+│   └── expenseController.js
+├── middleware
+│   ├── auth.js
+│   └── errorHandler.js
+├── models
+│   ├── Budget.js
+│   ├── Chat.js
+│   ├── Expense.js
+│   └── User.js
+├── package-lock.json
+├── package.json
+├── routes
+│   ├── auth.js
+│   ├── budget.js
+│   ├── chat.js
+│   └── expenses.js
+├── scratch
+│   ├── check_models.js
+│   ├── check_v1.js
+│   ├── debug_key.js
+│   ├── generate_docs.js
+│   ├── list_all.js
+│   ├── openrouter_test.js
+│   └── raw_test.js
+├── server.js
+└── utils
+    ├── aiSuggestions.js
+    ├── chatbot.js
+    ├── dateUtils.js
+    └── validators.js

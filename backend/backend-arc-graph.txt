@@ -1,0 +1,100 @@
+Dependency Summary
+
+config\db.js
+  └─ No dependencies
+
+controllers\authController.js
+  ├─ models\User.js
+  └─ utils\validators.js
+
+controllers\budgetController.js
+  ├─ models\Budget.js
+  ├─ models\User.js
+  ├─ models\Expense.js
+  └─ utils\aiSuggestions.js
+
+controllers\expenseController.js
+  ├─ models\Expense.js
+  ├─ models\User.js
+  ├─ utils\validators.js
+  └─ models\Budget.js
+
+middleware\auth.js
+  └─ No dependencies
+
+middleware\errorHandler.js
+  └─ No dependencies
+
+models\Budget.js
+  └─ No dependencies
+
+models\Chat.js
+  └─ No dependencies
+
+models\Expense.js
+  └─ No dependencies
+
+models\User.js
+  └─ No dependencies
+
+routes\auth.js
+  ├─ controllers\authController.js
+  └─ middleware\auth.js
+
+routes\budget.js
+  ├─ controllers\budgetController.js
+  └─ middleware\auth.js
+
+routes\chat.js
+  ├─ utils\chatbot.js
+  ├─ middleware\auth.js
+  ├─ models\Expense.js
+  ├─ models\Budget.js
+  ├─ models\Chat.js
+  └─ models\User.js
+
+routes\expenses.js
+  ├─ controllers\expenseController.js
+  └─ middleware\auth.js
+
+scratch\check_models.js
+  └─ No dependencies
+
+scratch\check_v1.js
+  └─ No dependencies
+
+scratch\debug_key.js
+  └─ No dependencies
+
+scratch\generate_docs.js
+  └─ No dependencies
+
+scratch\list_all.js
+  └─ No dependencies
+
+scratch\openrouter_test.js
+  └─ No dependencies
+
+scratch\raw_test.js
+  └─ No dependencies
+
+server.js
+  ├─ config\db.js
+  ├─ middleware\errorHandler.js
+  ├─ routes\auth.js
+  ├─ routes\expenses.js
+  ├─ routes\budget.js
+  └─ routes\chat.js
+
+utils\aiSuggestions.js
+  └─ models\Expense.js
+
+utils\chatbot.js
+  └─ No dependencies
+
+utils\dateUtils.js
+  └─ No dependencies
+
+utils\validators.js
+  └─ No dependencies
+

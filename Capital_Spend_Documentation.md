@@ -1,6 +1,6 @@
-# SmartSpend AI - Financial Intelligence Dashboard 🚀🌗
+# Capital Spend - Financial Intelligence Dashboard 🚀🌗
 
-SmartSpend AI is a high-fidelity, premium financial management application designed to give users total control over their capital through advanced analytics, budgeting tools, and an AI-powered financial assistant.
+Capital Spend is a high-fidelity, premium financial management application designed to give users total control over their capital through advanced analytics, budgeting tools, and an AI-powered financial assistant.
 
 ---
 
@@ -69,7 +69,7 @@ npm start
 
 ## 📂 Project Structure
 ```text
-SmartSpend AI/
+Capital Spend/
 ├── backend/
 │   ├── config/         # DB Connection
 │   ├── controllers/    # Business logic (Expenses, Budget, Chat)
@@ -103,4 +103,4 @@ The exported PDF includes:
 
 ---
 
-**SmartSpend AI - Transform your spending into intelligence.**
+**Capital Spend - Transform your spending into intelligence.**

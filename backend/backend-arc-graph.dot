@@ -1,0 +1,67 @@
+digraph G {
+
+  rankdir=LR;
+  splines=polyline;
+  overlap=false;
+  nodesep=0.5;
+  ranksep=1;
+
+  node [shape=box, style="rounded"];
+  edge [color="#6b7280"];
+  
+"config\db.js" [label="config\db.js"];
+"controllers\authController.js" [label="controllers\authController.js"];
+"controllers\budgetController.js" [label="controllers\budgetController.js"];
+"controllers\expenseController.js" [label="controllers\expenseController.js"];
+"middleware\auth.js" [label="middleware\auth.js"];
+"middleware\errorHandler.js" [label="middleware\errorHandler.js"];
+"models\Budget.js" [label="models\Budget.js"];
+"models\Chat.js" [label="models\Chat.js"];
+"models\Expense.js" [label="models\Expense.js"];
+"models\User.js" [label="models\User.js"];
+"routes\auth.js" [label="routes\auth.js"];
+"routes\budget.js" [label="routes\budget.js"];
+"routes\chat.js" [label="routes\chat.js"];
+"routes\expenses.js" [label="routes\expenses.js"];
+"scratch\check_models.js" [label="scratch\check_models.js"];
+"scratch\check_v1.js" [label="scratch\check_v1.js"];
+"scratch\debug_key.js" [label="scratch\debug_key.js"];
+"scratch\generate_docs.js" [label="scratch\generate_docs.js"];
+"scratch\list_all.js" [label="scratch\list_all.js"];
+"scratch\openrouter_test.js" [label="scratch\openrouter_test.js"];
+"scratch\raw_test.js" [label="scratch\raw_test.js"];
+"server.js" [label="server.js"];
+"utils\aiSuggestions.js" [label="utils\aiSuggestions.js"];
+"utils\chatbot.js" [label="utils\chatbot.js"];
+"utils\dateUtils.js" [label="utils\dateUtils.js"];
+"utils\validators.js" [label="utils\validators.js"];
+"controllers\authController.js" -> "models\User.js";
+"controllers\authController.js" -> "utils\validators.js";
+"controllers\budgetController.js" -> "models\Budget.js";
+"controllers\budgetController.js" -> "models\User.js";
+"controllers\budgetController.js" -> "models\Expense.js";
+"controllers\budgetController.js" -> "utils\aiSuggestions.js";
+"controllers\expenseController.js" -> "models\Expense.js";
+"controllers\expenseController.js" -> "models\User.js";
+"controllers\expenseController.js" -> "utils\validators.js";
+"controllers\expenseController.js" -> "models\Budget.js";
+"routes\auth.js" -> "controllers\authController.js";
+"routes\auth.js" -> "middleware\auth.js";
+"routes\budget.js" -> "controllers\budgetController.js";
+"routes\budget.js" -> "middleware\auth.js";
+"routes\chat.js" -> "utils\chatbot.js";
+"routes\chat.js" -> "middleware\auth.js";
+"routes\chat.js" -> "models\Expense.js";
+"routes\chat.js" -> "models\Budget.js";
+"routes\chat.js" -> "models\Chat.js";
+"routes\chat.js" -> "models\User.js";
+"routes\expenses.js" -> "controllers\expenseController.js";
+"routes\expenses.js" -> "middleware\auth.js";
+"server.js" -> "config\db.js";
+"server.js" -> "middleware\errorHandler.js";
+"server.js" -> "routes\auth.js";
+"server.js" -> "routes\expenses.js";
+"server.js" -> "routes\budget.js";
+"server.js" -> "routes\chat.js";
+"utils\aiSuggestions.js" -> "models\Expense.js";
+}

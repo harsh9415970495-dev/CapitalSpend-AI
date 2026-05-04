@@ -128,3 +128,42 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: '❌ Server error', error: error.message });
   }
 };
+
+// Social Login (Demo/Mock for now)
+exports.socialLogin = async (req, res) => {
+  try {
+    const { email, username, provider } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: '❌ Email is required for social login' });
+    }
+
+    // Find or create user
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        username: username || email.split('@')[0],
+        email,
+        password: Math.random().toString(36).slice(-12), // Random password for social users
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username || email}`,
+      });
+      await user.save();
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      message: `✅ Login successful via ${provider}`,
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: '❌ Social login error', error: error.message });
+  }
+};

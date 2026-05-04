@@ -1,0 +1,219 @@
+{
+  "entry": "config\\db.js",
+  "files": {
+    "config\\db.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "server.js"
+      ]
+    },
+    "controllers\\authController.js": {
+      "type": "other",
+      "dependsOn": [
+        "models\\User.js",
+        "utils\\validators.js"
+      ],
+      "usedBy": [
+        "routes\\auth.js"
+      ]
+    },
+    "controllers\\budgetController.js": {
+      "type": "other",
+      "dependsOn": [
+        "models\\Budget.js",
+        "models\\User.js",
+        "models\\Expense.js",
+        "utils\\aiSuggestions.js"
+      ],
+      "usedBy": [
+        "routes\\budget.js"
+      ]
+    },
+    "controllers\\expenseController.js": {
+      "type": "other",
+      "dependsOn": [
+        "models\\Expense.js",
+        "models\\User.js",
+        "utils\\validators.js",
+        "models\\Budget.js"
+      ],
+      "usedBy": [
+        "routes\\expenses.js"
+      ]
+    },
+    "middleware\\auth.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "routes\\auth.js",
+        "routes\\budget.js",
+        "routes\\chat.js",
+        "routes\\expenses.js"
+      ]
+    },
+    "middleware\\errorHandler.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "server.js"
+      ]
+    },
+    "models\\Budget.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "controllers\\budgetController.js",
+        "controllers\\expenseController.js",
+        "routes\\chat.js"
+      ]
+    },
+    "models\\Chat.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "routes\\chat.js"
+      ]
+    },
+    "models\\Expense.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "controllers\\budgetController.js",
+        "controllers\\expenseController.js",
+        "routes\\chat.js",
+        "utils\\aiSuggestions.js"
+      ]
+    },
+    "models\\User.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "controllers\\authController.js",
+        "controllers\\budgetController.js",
+        "controllers\\expenseController.js",
+        "routes\\chat.js"
+      ]
+    },
+    "routes\\auth.js": {
+      "type": "other",
+      "dependsOn": [
+        "controllers\\authController.js",
+        "middleware\\auth.js"
+      ],
+      "usedBy": [
+        "server.js"
+      ]
+    },
+    "routes\\budget.js": {
+      "type": "other",
+      "dependsOn": [
+        "controllers\\budgetController.js",
+        "middleware\\auth.js"
+      ],
+      "usedBy": [
+        "server.js"
+      ]
+    },
+    "routes\\chat.js": {
+      "type": "other",
+      "dependsOn": [
+        "utils\\chatbot.js",
+        "middleware\\auth.js",
+        "models\\Expense.js",
+        "models\\Budget.js",
+        "models\\Chat.js",
+        "models\\User.js"
+      ],
+      "usedBy": [
+        "server.js"
+      ]
+    },
+    "routes\\expenses.js": {
+      "type": "other",
+      "dependsOn": [
+        "controllers\\expenseController.js",
+        "middleware\\auth.js"
+      ],
+      "usedBy": [
+        "server.js"
+      ]
+    },
+    "scratch\\check_models.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "scratch\\check_v1.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "scratch\\debug_key.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "scratch\\generate_docs.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "scratch\\list_all.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "scratch\\openrouter_test.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "scratch\\raw_test.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "server.js": {
+      "type": "other",
+      "dependsOn": [
+        "config\\db.js",
+        "middleware\\errorHandler.js",
+        "routes\\auth.js",
+        "routes\\expenses.js",
+        "routes\\budget.js",
+        "routes\\chat.js"
+      ],
+      "usedBy": []
+    },
+    "utils\\aiSuggestions.js": {
+      "type": "other",
+      "dependsOn": [
+        "models\\Expense.js"
+      ],
+      "usedBy": [
+        "controllers\\budgetController.js"
+      ]
+    },
+    "utils\\chatbot.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "routes\\chat.js"
+      ]
+    },
+    "utils\\dateUtils.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": []
+    },
+    "utils\\validators.js": {
+      "type": "other",
+      "dependsOn": [],
+      "usedBy": [
+        "controllers\\authController.js",
+        "controllers\\expenseController.js"
+      ]
+    }
+  }
+}

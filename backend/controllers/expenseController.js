@@ -33,11 +33,11 @@ exports.addExpense = async (req, res) => {
     });
 
     await expense.save();
-    res.status(201).json({ 
-      message: '✅ Expense added successfully', 
+    res.status(201).json({
+      message: '✅ Expense added successfully',
       expense: {
         ...expense.toObject(),
-        date: expenseDate.toISOString().split('T') // Return in YYYY-MM-DD format
+        date: expenseDate.toISOString().split('T')[0] // Return in YYYY-MM-DD format
       }
     });
   } catch (error) {
@@ -84,7 +84,7 @@ exports.getExpenses = async (req, res) => {
     // Format dates for response
     const formattedExpenses = expenses.map(exp => ({
       ...exp.toObject(),
-      date: exp.date.toISOString().split('T') // Return in YYYY-MM-DD format
+      date: exp.date.toISOString().split('T')[0] // Return in YYYY-MM-DD format
     }));
 
     const total = await Expense.countDocuments(filter);
@@ -118,7 +118,7 @@ exports.getExpenseById = async (req, res) => {
     // Format date for response
     const formattedExpense = {
       ...expense.toObject(),
-      date: expense.date.toISOString().split('T')
+      date: expense.date.toISOString().split('T')[0]
     };
 
     res.json(formattedExpense);
@@ -153,11 +153,11 @@ exports.updateExpense = async (req, res) => {
     if (note !== undefined) expense.note = note;
 
     await expense.save();
-    res.json({ 
-      message: '✅ Expense updated successfully', 
+    res.json({
+      message: '✅ Expense updated successfully',
       expense: {
         ...expense.toObject(),
-        date: expense.date.toISOString().split('T')
+        date: expense.date.toISOString().split('T')[0]
       }
     });
   } catch (error) {
@@ -248,7 +248,7 @@ exports.getExpenseSummary = async (req, res) => {
       monthlyTotal: monthlyExpenses?.total || 0,
       categoryBreakdown,
       dailyExpenses,
-      currentDate: currentDate.toISOString().split('T')
+      currentDate: currentDate.toISOString().split('T')[0]
     });
   } catch (error) {
     res.status(500).json({ message: '❌ Server error', error: error.message });
@@ -277,22 +277,22 @@ exports.exportPDF = async (req, res) => {
       User.findById(req.user._id)
     ]);
 
-    const doc = new PDFDocument({ margin: 50, size: 'A4' });
-    let filename = `SmartSpend_${fullUser?.username || 'Report'}.pdf`;
-    
+    const doc = new PDFDocument({ margin: 50, size: 'A4', bufferPages: true });
+    let filename = `CapitalSpend_${fullUser?.username || 'Report'}.pdf`;
+
     res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
     res.setHeader('Content-type', 'application/pdf');
 
     // --- Branded Header ---
     doc.rect(0, 0, 600, 120).fill('#0f172a'); // Dark Obsidian Header
-    doc.fillColor('#3b82f6').fontSize(28).font('Helvetica-Bold').text('SmartSpend AI', 50, 40);
+    doc.fillColor('#3b82f6').fontSize(28).font('Helvetica-Bold').text('Capital Spend', 50, 40);
     doc.fillColor('#94a3b8').fontSize(10).font('Helvetica').text('FINANCIAL INTELLIGENCE REPORT', 50, 75, { characterSpacing: 2 });
-    
+
     // User Info (Right Aligned)
     doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold').text(fullUser?.username?.toUpperCase() || 'VALUED MEMBER', 400, 45, { align: 'right' });
     doc.fillColor('#94a3b8').font('Helvetica').fontSize(8).text(fullUser?.email || '', 400, 58, { align: 'right' });
     doc.fillColor('#ffffff').fontSize(8).text(`Report Date: ${new Date().toLocaleDateString()}`, 400, 75, { align: 'right' });
-    
+
     doc.moveDown(4);
 
 
@@ -333,7 +333,7 @@ exports.exportPDF = async (req, res) => {
     doc.text('AMOUNT', 450, tableTop + 8, { align: 'right', width: 80 });
 
     let currentY = tableTop + 25;
-    
+
     // Rows
     doc.font('Helvetica').fontSize(9);
     expenses.forEach((exp, i) => {
@@ -361,7 +361,7 @@ exports.exportPDF = async (req, res) => {
     for (let i = 0; i < pageCount; i++) {
       doc.switchToPage(i);
       doc.fillColor('#94a3b8').fontSize(8).text(
-        `SmartSpend AI - Page ${i + 1} of ${pageCount} | Generated on ${new Date().toLocaleString()}`,
+        `Capital Spend - Page ${i + 1} of ${pageCount} | Generated on ${new Date().toLocaleString()}`,
         0,
         800,
         { align: 'center', width: 595 }
@@ -376,4 +376,4 @@ exports.exportPDF = async (req, res) => {
     console.error('PDF Export Error:', error);
     res.status(500).json({ message: '❌ PDF Generation Failed', error: error.message });
   }
-};
+};
