@@ -40,7 +40,8 @@ export const expenseAPI = {
 
 export const budgetAPI = {
   setBudget: (data) => api.post('/budget/set', data),
-  getBudgetStatus: () => api.get('/budget/status'),
+  getBudgetStatus: (params) => api.get('/budget/status', { params }),
+  getAvailableMonths: () => api.get('/budget/available-months'),
 };
 
 export const chatAPI = {

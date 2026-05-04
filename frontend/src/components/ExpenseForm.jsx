@@ -83,12 +83,12 @@ const ExpenseForm = ({ onAdd, onCancel, editData, onUpdate }) => {
             onChange={handleChange}
             className="input-premium w-full appearance-none"
           >
-            <option>Food</option>
-            <option>Travel</option>
-            <option>Shopping</option>
-            <option>Bills</option>
-            <option>Entertainment</option>
-            <option>Other</option>
+            <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Food</option>
+            <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Travel</option>
+            <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Shopping</option>
+            <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Bills</option>
+            <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Entertainment</option>
+            <option className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Other</option>
           </select>
         </div>
 

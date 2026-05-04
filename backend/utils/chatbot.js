@@ -13,7 +13,7 @@ const getChatResponse = async (messages, userData = null) => {
       : "https://api.x.ai/v1/chat/completions";
 
     let apiMessages = messages.map(m => ({
-      role: m.role === 'assistant' ? 'assistant' : 'user',
+      role: m.role === 'assistant' ? 'assistant' : (m.role === 'system' ? 'system' : 'user'),
       content: m.content
     }));
 

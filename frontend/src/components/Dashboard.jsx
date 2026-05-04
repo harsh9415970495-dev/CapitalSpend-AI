@@ -7,16 +7,66 @@ const Dashboard = () => {
   const [expenses, setExpenses] = useState([]);
   const [budgetData, setBudgetData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [availableMonths, setAvailableMonths] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(""); // Format: YYYY-MM
 
   useEffect(() => {
-    fetchData();
+    const init = async () => {
+      await fetchAvailableMonths();
+    };
+    init();
   }, []);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (selectedMonth) {
+      fetchData(selectedMonth);
+    } else {
+      // Default to current month if selectedMonth is not set yet
+      const now = new Date();
+      const current = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      setSelectedMonth(current);
+    }
+  }, [selectedMonth]);
+
+  const fetchAvailableMonths = async () => {
     try {
+      const res = await budgetAPI.getAvailableMonths();
+      setAvailableMonths(res.data.availableMonths);
+      
+      // Set initial selected month to the most recent available month if not already set
+      if (!selectedMonth && res.data.availableMonths.length > 0) {
+        setSelectedMonth(res.data.availableMonths[0]);
+      }
+    } catch (err) {
+      console.error("Error fetching available months:", err);
+    }
+  };
+
+  const fetchData = async (monthStr) => {
+    setLoading(true);
+    try {
+      let params = {};
+      let expenseParams = {};
+
+      if (monthStr === "overall") {
+        params = { allTime: true };
+        // expenseParams remains empty to fetch all expenses
+      } else if (monthStr) {
+        const [year, month] = monthStr.split("-");
+        params = { year, month };
+
+        const [y, m] = monthStr.split("-").map(Number);
+        const start = new Date(y, m - 1, 1);
+        const end = new Date(y, m, 0, 23, 59, 59);
+        expenseParams = {
+          startDate: start.toISOString(),
+          endDate: end.toISOString()
+        };
+      }
+
       const [expenseRes, budgetRes] = await Promise.all([
-        expenseAPI.getExpenses(),
-        budgetAPI.getBudgetStatus()
+        expenseAPI.getExpenses(expenseParams),
+        budgetAPI.getBudgetStatus(params)
       ]);
       setExpenses(expenseRes.data.expenses);
       setBudgetData(budgetRes.data);
@@ -52,8 +102,28 @@ const Dashboard = () => {
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Monitor your capital flow and AI-driven insights.</p>
         </div>
-        <div className="flex gap-3">
-          <button className="btn-premium px-6 py-2.5 text-white" onClick={fetchData}>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <select 
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="appearance-none bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 pr-10 text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer"
+            >
+              <option value="overall" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-black">Overall (All-Time)</option>
+              <hr className="my-1 border-slate-100 dark:border-white/5" />
+              {availableMonths.map((m) => {
+                const [y, mon] = m.split("-");
+                const date = new Date(parseInt(y), parseInt(mon) - 1);
+                const label = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                return <option key={m} value={m} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{label}</option>;
+              })}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </div>
+          <button className="btn-premium px-6 py-2.5 text-white flex items-center gap-2" onClick={() => fetchData(selectedMonth)}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
             Refresh Analytics
           </button>
         </div>
@@ -63,13 +133,17 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="stat-card">
           <div className="flex items-center justify-between mb-6">
-            <span className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-[0.1em]">Monthly Budget</span>
+            <span className="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-[0.1em]">
+              {selectedMonth === "overall" ? "Lifetime Budget" : "Monthly Budget"}
+            </span>
             <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
               <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
           </div>
           <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">₹{budget.toLocaleString()}</h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase mt-3 tracking-widest">Total Allocation</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase mt-3 tracking-widest">
+            {selectedMonth === "overall" ? "Total Planned Capital" : "Total Allocation"}
+          </p>
         </div>
 
         <div className="stat-card">

@@ -16,6 +16,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --bg-main: #020617;
     --bg-card: rgba(15, 23, 42, 0.7);
     --bg-sidebar: #020617;
